@@ -6,10 +6,14 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.datatransfer.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,6 +31,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
 
     public static DefaultTableModel tableModel = new DefaultTableModel();
     public static JTable table = new JTable(tableModel);
+    public static JButton delete = new JButton("DELETE");
 
 
     public static void main(String[] args) {
@@ -156,7 +161,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
     }
 
 
-    static class GUI extends JFrame {
+    static class GUI extends JFrame implements ActionListener  {
         private static final long serialVersionUID = 1L;
 
         public GUI() {
@@ -166,11 +171,37 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
             setSize(screenSize.width, screenSize.height);
             setLocationRelativeTo(null);
             setVisible(true);
+            setLayout(new BorderLayout());
             JPanel contentPane = new JPanel();
             contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
             contentPane.setLayout(new BorderLayout(0, 0));
-            setContentPane(contentPane);
+            //setContentPane(contentPane);
+            add(contentPane,BorderLayout.CENTER);
+            JPanel panel = new JPanel();
+            panel.setLayout(new BorderLayout());
+
+            delete.setSize(150,40);
+            delete.addActionListener(this);
+            //add(delete,BorderLayout.PAGE_END);
+            panel.add(delete,BorderLayout.CENTER);
+            add(panel,BorderLayout.PAGE_END);
         }
+
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == delete) {
+                System.out.println(" >>>>>> ???   " + copiedItems.size());
+                DefaultTableModel tModel =  (DefaultTableModel)  table.getModel();
+                System.out.println("selected : "+ table.getSelectedRow());
+                System.out.println("selected : "+ table.getSelectedColumn());
+                tModel.removeRow(table.getSelectedRow());
+                table.addNotify();
+
+
+            }
+        }
+
     }
 
     static class Worker extends SwingWorker<DefaultTableModel, Object[]> {
