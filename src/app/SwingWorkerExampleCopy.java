@@ -11,7 +11,10 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +56,8 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
 
                 table.setEnabled(true);
                 table.addNotify();
+                table.setGridColor(Color.LIGHT_GRAY);
+              //  table.setRowHeight(40);
 
                 JScrollPane scrollPane = new JScrollPane(table);
                 scrollPane.setVerticalScrollBarPolicy(
@@ -115,7 +120,11 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                                 .stringFlavor));
                         // add time stamp
 
-                        copiedItems.add(new SimpleBook("time", t.getTransferData(DataFlavor
+                        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                        Calendar cal = Calendar.getInstance();
+                        System.out.println(dateFormat.format(cal.getTime()));
+
+                        copiedItems.add(new SimpleBook(dateFormat.format(cal.getTime()), t.getTransferData(DataFlavor
                                 .stringFlavor).toString()));
                         // Use a SwingWorker
                         Worker worker = new Worker();
@@ -171,7 +180,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
 
         Worker() {
             model.setColumnCount(numCols);
-            model.setColumnIdentifiers(new Object[]{"S.No", "Copied Text "});
+            model.setColumnIdentifiers(new Object[]{"S.No","Time ", "Copied Text "});
         }
 
         @Override
@@ -179,7 +188,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
             System.out.println("SwingWorkerExampleCopy.copiedItems.size() " + SwingWorkerExampleCopy.copiedItems.size());
             // Add row
             for (int row = 0; row <= SwingWorkerExampleCopy.copiedItems.size(); row++) {
-                model.addRow(new Object[]{row + 1, SwingWorkerExampleCopy.copiedItems.get(row).getContent()});
+                model.addRow(new Object[]{row + 1,SwingWorkerExampleCopy.copiedItems.get(row).getTime(), SwingWorkerExampleCopy.copiedItems.get(row).getContent()});
             }
             return model;
         }
@@ -192,6 +201,9 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
             TableColumn columnA = table.getColumn("S.No");
             columnA.setMinWidth(10);
             columnA.setMaxWidth(50);
+            TableColumn columnB = table.getColumn("Time ");
+            columnB.setMinWidth(170);
+            columnB.setMaxWidth(180);
         }
 
     }
