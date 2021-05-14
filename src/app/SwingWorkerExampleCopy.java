@@ -5,13 +5,11 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -111,10 +109,10 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                         Calendar cal = Calendar.getInstance();
                         boolean isPresent = checkDuplicateElementInList(copiedItems,t.getTransferData(DataFlavor
-                                .stringFlavor).toString());
+                                .stringFlavor).toString().trim());
                         if(!isPresent){
                             copiedItems.add(new SimpleBook("",dateFormat.format(cal.getTime()), t.getTransferData(DataFlavor
-                                    .stringFlavor).toString()));
+                                    .stringFlavor).toString().trim()));
                         }
                         // Use a SwingWorker
                         Worker worker = new Worker();
@@ -136,44 +134,52 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
         clip.setContents(tText, null);
     }
 
-
-    static class GUI extends JFrame implements ActionListener  {
-        private static final long serialVersionUID = 1L;
+    static class GUI extends JFrame  {
 
         public GUI() {
-            setTitle("ClipBoard Manager V1.0 by Sakthivel Iyappan ");
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            setSize(screenSize.width, screenSize.height);
-            setLocationRelativeTo(null);
-            setVisible(true);
-            setLayout(new BorderLayout());
-            JPanel contentPane = new JPanel();
-            contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
-            contentPane.setLayout(new BorderLayout(0, 0));
-            add(contentPane,BorderLayout.CENTER);
-            JPanel panel = new JPanel();
-            panel.setLayout(new BorderLayout());
 
-            delete.setSize(150,40);
-            delete.addActionListener(this);
-            panel.add(delete,BorderLayout.CENTER);
-            add(panel,BorderLayout.PAGE_END);
+            setTitle("ClipBoard Manager V1.0  -   By SAKTHIVEL IYAPPAN  -  Innovative Solutions - email: innovativesolutionsapps@gmail.com");
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            setSize(screenSize.width - 40, screenSize.height - 200 );
+            setLocationRelativeTo(null);
+            setLayout(new BorderLayout());
+            setVisible(true);
+            JPanel help = new JPanel();
+            help.setSize(40,80);
+            help.add(new JLabel("headerText"));
+            add(help, BorderLayout.PAGE_START);
+            add(new JPanel() {
+                {
+                    add(new JButton(new AbstractAction(" Delete Row ") {
+                        @Override
+                        public void actionPerformed(ActionEvent arg0) {
+                            DefaultTableModel tModel =  (DefaultTableModel)  table.getModel();
+                            SwingWorkerExampleCopy.copiedItems.remove(SwingWorkerExampleCopy.copiedItems.get(table.getSelectedRow()));
+                            tModel.removeRow(table.getSelectedRow());
+                            table.addNotify();
+                        }
+                    }));
+                }
+
+            }, BorderLayout.SOUTH);
 
             addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                     String s = (String)JOptionPane.showInputDialog(
                             null,
-                            "File will be saved inside your Documents folder \n"+
-                            "Enter text file name",
+                            "file will be saved inside your /Documents/ClipboardManager folder \n"+
+                            "Enter file name : ",
                             "Do you want to save ? ",
                             JOptionPane.PLAIN_MESSAGE,
                             null,
                             null,
                             null);
-                    //If a string was returned, say so.
                     if ((s != null) && (s.length() > 0)) {
                         MakeTable.writeReport(SwingWorkerExampleCopy.copiedItems,s);
+                        System.exit(0);
+                    }
+                    else {
                         System.exit(0);
                     }
                 }
@@ -182,28 +188,22 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
             setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         }
 
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == delete) {
-                DefaultTableModel tModel =  (DefaultTableModel)  table.getModel();
-                SwingWorkerExampleCopy.copiedItems.remove(SwingWorkerExampleCopy.copiedItems.get(table.getSelectedRow()));
-                tModel.removeRow(table.getSelectedRow());
-                table.addNotify();
-            }
-        }
     }
 
     public boolean checkDuplicateElementInList(List<SimpleBook> list, String obj) {
         boolean isAvail = false;
         for (int i = 0; i < list.size(); i++) {
-            String data = list.get(i).getContent();
-            if (data.equals(obj)) {
+            String data = list.get(i).getContent().trim();
+            if(data.length() == 0){
                 isAvail = true;
-                break;
+            }else if(data.length() > 0){
+                if (data.equals(obj)) {
+                    isAvail = true;
+                    break;
+                }
+                if (isAvail)
+                    break;
             }
-            if (isAvail)
-                break;
         }
         return isAvail;
     }
