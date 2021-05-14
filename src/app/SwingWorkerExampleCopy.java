@@ -112,8 +112,19 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
         if (keyReleaseCount == keyPressCount) {
             keyPressCount = 0;
             keyReleaseCount = 0;
+            boolean keyCopy = false;
 
-            if (keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_META) && keyPresse.get(1) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_C)) {
+            String os = System.getProperty("os.name");
+            if (os.contains("Windows")) // if windows
+            {
+                keyCopy = keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_CONTROL) && keyPresse.get(1) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_C);
+
+            }else {
+                keyCopy = keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_META) && keyPresse.get(1) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_C);
+            }
+
+
+            if (keyCopy) {
                 System.out.println("INSIDE COPY Condition......");
 
                 Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -147,13 +158,8 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                 }
             } else if (keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_CONTROL)) {
                 System.out.println("items size " + copiedItems.size());
-                System.out.println("INSIDE Ctrl+Command/windows key  Condition......" + copiedItems.get(copiedItems.size() - 2));
+                System.out.println("INSIDE Ctrl key  Condition......" + copiedItems.get(copiedItems.size() - 2));
                 setSysClipboardText(copiedItems.get(copiedItems.size() - 2).getContent());
-            }
-
-
-            for (int i = 0; i < copiedItems.size(); i++) {
-                System.out.println(" copiedItems i :" + i + ": " + "value : " + copiedItems.get(i));
             }
 
             keyPresse.clear();
@@ -210,15 +216,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                     if ((s != null) && (s.length() > 0)) {
                         System.out.println("============ " + s);
 
-
-                        MakeTable.writeReport(SwingWorkerExampleCopy.copiedItems);
-
-
-
-
-
-
-
+                        MakeTable.writeReport(SwingWorkerExampleCopy.copiedItems,s);
 
                         System.exit(0);
                     }
@@ -255,7 +253,6 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
         }
 
     }
-
 
     public boolean checkDuplicateElementInList(List<SimpleBook> list, String obj) {
         boolean isAvail = false;
