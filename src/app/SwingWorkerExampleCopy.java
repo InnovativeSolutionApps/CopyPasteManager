@@ -10,11 +10,14 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.datatransfer.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +30,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
 
     public static DefaultTableModel tableModel = new DefaultTableModel();
     public static JTable table = new JTable(tableModel);
+    public static JButton delete = new JButton("DELETE");
 
 
     public static void main(String[] args) {
@@ -124,8 +128,15 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                         Calendar cal = Calendar.getInstance();
                         System.out.println(dateFormat.format(cal.getTime()));
 
-                        copiedItems.add(new SimpleBook(dateFormat.format(cal.getTime()), t.getTransferData(DataFlavor
-                                .stringFlavor).toString()));
+                        boolean isPresent = checkDuplicateElementInList(copiedItems,t.getTransferData(DataFlavor
+                                .stringFlavor).toString());
+                        System.out.println("isPresent "+ isPresent);
+
+                        if(!isPresent){
+                            copiedItems.add(new SimpleBook("",dateFormat.format(cal.getTime()), t.getTransferData(DataFlavor
+                                    .stringFlavor).toString()));
+                        }
+
                         // Use a SwingWorker
                         Worker worker = new Worker();
                         worker.execute();
@@ -156,21 +167,110 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
     }
 
 
-    static class GUI extends JFrame {
+    static class GUI extends JFrame implements ActionListener  {
         private static final long serialVersionUID = 1L;
 
         public GUI() {
             setTitle("GUI");
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            //setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             setSize(screenSize.width, screenSize.height);
             setLocationRelativeTo(null);
             setVisible(true);
+            setLayout(new BorderLayout());
             JPanel contentPane = new JPanel();
             contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
             contentPane.setLayout(new BorderLayout(0, 0));
-            setContentPane(contentPane);
+            //setContentPane(contentPane);
+            add(contentPane,BorderLayout.CENTER);
+            JPanel panel = new JPanel();
+            panel.setLayout(new BorderLayout());
+
+            delete.setSize(150,40);
+            delete.addActionListener(this);
+            //add(delete,BorderLayout.PAGE_END);
+            panel.add(delete,BorderLayout.CENTER);
+            add(panel,BorderLayout.PAGE_END);
+
+            addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+
+                    String s = (String)JOptionPane.showInputDialog(
+                            null,
+                            "File will be saved inside your Documents folder \n"+
+                            "Enter text file name",
+                            "Do you want to save ? ",
+                            JOptionPane.PLAIN_MESSAGE,
+                            null,
+                            null,
+                            null);
+
+                    //If a string was returned, say so.
+                    if ((s != null) && (s.length() > 0)) {
+                        System.out.println("============ " + s);
+
+
+                        MakeTable.writeReport(SwingWorkerExampleCopy.copiedItems);
+
+
+
+
+
+
+
+
+                        System.exit(0);
+                    }
+                    else if(s == null) {
+                        System.out.println("=====else ======= " + s);
+
+                    }
+
+
+
+
+
+
+
+
+
+                }
+            });
+
+
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
         }
+
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == delete) {
+                DefaultTableModel tModel =  (DefaultTableModel)  table.getModel();
+                SwingWorkerExampleCopy.copiedItems.remove(SwingWorkerExampleCopy.copiedItems.get(table.getSelectedRow()));
+                tModel.removeRow(table.getSelectedRow());
+                table.addNotify();
+            }
+        }
+
+    }
+
+
+    public boolean checkDuplicateElementInList(List<SimpleBook> list, String obj) {
+        boolean isAvail = false;
+        for (int i = 0; i < list.size(); i++) {
+            String data = list.get(i).getContent();
+//            System.out.println("data" + data);
+//            System.out.println("obj" + obj);
+            if (data.equals(obj)) {
+                isAvail = true;
+                break;
+            }
+            if (isAvail)
+                break;
+        }
+        return isAvail;
     }
 
     static class Worker extends SwingWorker<DefaultTableModel, Object[]> {
@@ -189,6 +289,9 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
             // Add row
             for (int row = 0; row <= SwingWorkerExampleCopy.copiedItems.size(); row++) {
                 model.addRow(new Object[]{row + 1,SwingWorkerExampleCopy.copiedItems.get(row).getTime(), SwingWorkerExampleCopy.copiedItems.get(row).getContent()});
+
+                 SwingWorkerExampleCopy.copiedItems.get(row).setsNo(String.valueOf(row+1));
+
             }
             return model;
         }
@@ -208,33 +311,6 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
 
     }
 }
-class SimpleBook {
-    private String time;
-    private String content;
 
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-
-    public SimpleBook( String time, String content) {
-        this.time = time;
-        this.content = content;
-    }
-
-
-}
 
 
