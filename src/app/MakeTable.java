@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,13 +15,16 @@ public class MakeTable {
     public static File file;
 
     public static void createFolder() {
-        file = new File(System.getProperty("user.dir") + "/ClipboardManager");
+
+        file = new File(System.getProperty("user.home") + "/Documents/ClipboardManager");
+
         if (!file.exists()) {
             file.mkdir();
         }
     }
 
-    public static void writeReport(List<SimpleBook> val1) {
+
+    public static void writeReport(List<SimpleBook> val1,String fileName) {
 
         createFolder();
 
@@ -31,7 +33,8 @@ public class MakeTable {
         BufferedWriter writeTable = null;
         try {
 
-            writeTable = new BufferedWriter(new FileWriter("ClipboardManager/" + "Report_" + dateFormat.format(date) + ".txt"));
+            writeTable = new BufferedWriter(new FileWriter(System.getProperty("user.home") + "/Documents/ClipboardManager/" + fileName + dateFormat.format(date) + ".txt"));
+            System.out.println("--------------------???? " + System.getProperty("user.home") + "/Documents/ClipboardManager/" + fileName + dateFormat.format(date) + ".txt");
             writeTable.write("\n");
             writeTable.write("\n");
             writeTable.newLine();
