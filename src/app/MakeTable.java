@@ -33,7 +33,7 @@ public class MakeTable {
         BufferedWriter writeTable = null;
         try {
 
-            writeTable = new BufferedWriter(new FileWriter(System.getProperty("user.home") + "/Documents/ClipboardManager/" + fileName + dateFormat.format(date) + ".txt"));
+            writeTable = new BufferedWriter(new FileWriter(System.getProperty("user.home") + "/Documents/ClipboardManager/" + fileName + "_" + dateFormat.format(date) + ".txt"));
             System.out.println("--------------------???? " + System.getProperty("user.home") + "/Documents/ClipboardManager/" + fileName + dateFormat.format(date) + ".txt");
             writeTable.write("\n");
             writeTable.write("\n");

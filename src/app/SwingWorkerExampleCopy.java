@@ -47,6 +47,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                 Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
                 logger.setLevel(Level.OFF);
                 logger.setUseParentHandlers(false);
+
                 GlobalScreen.addNativeKeyListener(new SwingWorkerExampleCopy());
 
                 GUI gui = new GUI();
@@ -89,6 +90,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
 
     @Override
     public void nativeKeyPressed(NativeKeyEvent e) {
+        System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
                 GlobalScreen.unregisterNativeHook();
@@ -96,29 +98,53 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                 nativeHookException.printStackTrace();
             }
         }
-        if (keyPresse.size() == 0) {
-            keyPresse.add(0, NativeKeyEvent.getKeyText(e.getKeyCode()));
-            keyPressCount = keyPressCount + 1;
-        } else {
-            keyPresse.add(keyPresse.size(), NativeKeyEvent.getKeyText(e.getKeyCode()));
-            keyPressCount = keyPressCount + 1;
+
+        if( e.getKeyCode() == NativeKeyEvent.VC_C || e.getKeyCode() == NativeKeyEvent.VC_CONTROL || e.getKeyCode() == NativeKeyEvent.VC_SHIFT || e.getKeyCode() == NativeKeyEvent.VC_META){
+            if (keyPresse.size() == 0) {
+                keyPresse.add(0, NativeKeyEvent.getKeyText(e.getKeyCode()));
+                keyPressCount = keyPressCount + 1;
+            } else {
+                keyPresse.add(keyPresse.size(), NativeKeyEvent.getKeyText(e.getKeyCode()));
+                keyPressCount = keyPressCount + 1;
+            }
+
         }
+
+
+
     }
 
     @Override
     public void nativeKeyReleased(NativeKeyEvent e) {
-        keyReleaseCount = keyReleaseCount + 1;
+        System.out.println("Key Released: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+
+        if( e.getKeyCode() == NativeKeyEvent.VC_C ||  e.getKeyCode() == NativeKeyEvent.VC_CONTROL ||  e.getKeyCode() == NativeKeyEvent.VC_SHIFT || e.getKeyCode() == NativeKeyEvent.VC_META){
+            keyReleaseCount = keyReleaseCount + 1;
+        }
+
+        //System.out.println("keyReleaseCount"+ keyReleaseCount);
+        //System.out.println("keyPressCount"+ keyPressCount);
+        //System.out.println("keyPresse.size "+ keyPresse.size());
+
         if (keyReleaseCount == keyPressCount) {
-            keyPressCount = 0;
-            keyReleaseCount = 0;
             boolean keyCopy = false;
 
             String os = System.getProperty("os.name");
-            if (os.contains("Windows")) {
-                keyCopy = keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_CONTROL) && keyPresse.get(1) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_C);
-            } else {
-                keyCopy = keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_META) && keyPresse.get(1) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_C);
+
+            if(keyReleaseCount == 2){
+                if (os.contains("Windows")) {
+                    System.out.println("======== inside Windows ===============");
+                    keyCopy = keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_CONTROL) && keyPresse.get(1) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_C );
+                } else {
+                    keyCopy = keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_META) && keyPresse.get(1) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_C);
+                }
+                keyPressCount = 0;
+                keyReleaseCount = 0;
             }
+
+
+            System.out.println(">>>>>>>>> keyCopy >>>>>>>>> "+ keyCopy + ">>>>>>>>>>>>>>>>" );
+
 
             if (keyCopy) {
                 Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -130,20 +156,29 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                         boolean isPresent = checkDuplicateElementInList(copiedItems,t.getTransferData(DataFlavor
                                 .stringFlavor).toString().trim());
                         if(!isPresent){
+                            System.out.println("========== item added to list ======== ");
                             copiedItems.add(new SimpleBook("",dateFormat.format(cal.getTime()), t.getTransferData(DataFlavor
                                     .stringFlavor).toString().trim()));
+                            // Use a SwingWorker
+                            Worker worker = new Worker();
+                            worker.execute();
                         }
-                        // Use a SwingWorker
-                        Worker worker = new Worker();
-                        worker.execute();
+
                     }
                 } catch (UnsupportedFlavorException | IOException ex) {
                     System.out.println(ex);
                 }
-            } else if (keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_CONTROL)) {
-                setSysClipboardText(copiedItems.get(copiedItems.size() - 1).getContent());
+            } else if (keyPresse.size() > 0 &&  keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_SHIFT)) {
+                if(copiedItems.size() > 1){
+                   System.out.println("=========== SHIFT  Clicked ============");
+                    setSysClipboardText(copiedItems.get(copiedItems.size() - 2).getContent());
+                }
             }
+
+
             keyPresse.clear();
+            keyPressCount = 0;
+            keyReleaseCount = 0;
         }
     }
 
@@ -165,7 +200,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
             setVisible(true);
             JPanel help = new JPanel();
             help.setSize(40,80);
-            help.add(new JLabel("Key Shortcut to get previous copied item : 1.  press “Control” release it, 2. Then as usual press “ Ctlr + V “ to Paste it. "));
+            help.add(new JLabel("Key Shortcut to get previous copied item : 1.  press “ SHIFT ” release it, 2. Then as usual press “ Ctlr + V “ to Paste it. "));
 
             add(help, BorderLayout.PAGE_START);
             add(new JPanel() {
