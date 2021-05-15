@@ -1,5 +1,8 @@
 package app;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -34,8 +37,9 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
             @Override
             public void run() {
                 try {
+                    callAPIToKnowUsersCount();
                     GlobalScreen.registerNativeHook();
-                } catch (NativeHookException ex) {
+                } catch (NativeHookException | IOException ex) {
                     System.err.println("There was a problem registering the native hook.");
                     System.err.println(ex.getMessage());
                     System.exit(1);
@@ -62,6 +66,21 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                         .add(scrollPane, BorderLayout.CENTER);
             }
         });
+    }
+
+    public  static void callAPIToKnowUsersCount() throws IOException {
+        try {
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            Request request = new Request.Builder()
+                    .url("https://www.googleapis.com/youtube/v3/playlistItems?playlistId=PL0jZJKi2AEUWbSFtje6N5Obf7QVhmuzT5&key=AIzaSyCgietvXJJ-khTiMqQaFnZ-vqT5VqSGDCU")
+                    .method("GET", null)
+                    .build();
+            Response response = client.newCall(request).execute();
+            System.out.println("response" + response);
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
 
     @Override
@@ -122,7 +141,7 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
                     System.out.println(ex);
                 }
             } else if (keyPresse.get(0) == NativeKeyEvent.getKeyText(NativeKeyEvent.VC_CONTROL)) {
-                setSysClipboardText(copiedItems.get(copiedItems.size() - 2).getContent());
+                setSysClipboardText(copiedItems.get(copiedItems.size() - 1).getContent());
             }
             keyPresse.clear();
         }
@@ -146,7 +165,8 @@ public class SwingWorkerExampleCopy implements NativeKeyListener {
             setVisible(true);
             JPanel help = new JPanel();
             help.setSize(40,80);
-            help.add(new JLabel("headerText"));
+            help.add(new JLabel("Key Shortcut to get previous copied item : 1.  press “Control” release it, 2. Then as usual press “ Ctlr + V “ to Paste it. "));
+
             add(help, BorderLayout.PAGE_START);
             add(new JPanel() {
                 {
